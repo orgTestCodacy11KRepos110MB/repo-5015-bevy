@@ -25,9 +25,10 @@ use bevy_utils::{
     Instant,
 };
 use bevy_window::{
-    CursorEntered, CursorLeft, CursorMoved, FileDragAndDrop, ModifiesWindows, ReceivedCharacter,
-    RequestRedraw, Window, WindowBackendScaleFactorChanged, WindowCloseRequested, WindowCreated,
-    WindowFocused, WindowMoved, WindowResized, WindowScaleFactorChanged,
+    exit_on_all_closed, CursorEntered, CursorLeft, CursorMoved, FileDragAndDrop, ModifiesWindows,
+    ReceivedCharacter, RequestRedraw, Window, WindowBackendScaleFactorChanged,
+    WindowCloseRequested, WindowCreated, WindowFocused, WindowMoved, WindowResized,
+    WindowScaleFactorChanged,
 };
 
 use winit::{
@@ -54,8 +55,11 @@ impl Plugin for WinitPlugin {
                 CoreStage::PostUpdate,
                 SystemSet::new()
                     .label(ModifiesWindows)
-                    .with_system(changed_window)
-                    .with_system(despawn_window),
+                    // exit_on_all_closed only uses the query to determine if the query is empty,
+                    // and so doesn't care about ordering relative to changed_window
+                    .with_system(changed_window.ambiguous_with(exit_on_all_closed))
+                    // Update the state of the window before attempting to despawn to ensure consistent event ordering
+                    .with_system(despawn_window.after(changed_window)),
             );
 
         #[cfg(target_arch = "wasm32")]

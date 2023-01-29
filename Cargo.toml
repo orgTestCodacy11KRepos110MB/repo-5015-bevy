@@ -1426,6 +1426,12 @@ category = "Tools"
 wasm = false
 
 [[example]]
+name = "internal_ambiguities"
+path = "tests/internal_ambiguities.rs"
+[package.metadata.example.internal_ambiguities]
+hidden = true
+
+[[example]]
 name = "3d_rotation"
 path = "examples/transforms/3d_rotation.rs"
 
